@@ -1,0 +1,6 @@
+{
+  "appId": "tech.viralbit.music",
+  "appName": "ViralBit Music",
+  "webDir": "web",
+  "bundledWebRuntime": false
+}

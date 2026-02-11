@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ViralBit Music</string>
+    <string name="title_activity_main">ViralBit Music</string>
+    <string name="package_name">tech.viralbit.music</string>
+    <string name="custom_url_scheme">tech.viralbit.music</string>
+</resources>

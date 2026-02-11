@@ -1,0 +1,2321 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="color-scheme" content="dark light" />
+
+  <title>ViralBit Music</title>
+  <meta name="description" content="ViralBit Music — premium offline music player UI (ViralBit UI Kit)." />
+  <meta name="author" content="Calyx Drey" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" referrerpolicy="no-referrer" />
+
+  <style>
+    /* =========================
+       VIRALBIT UI KIT (from pro2.html — same core vars)
+       ========================= */
+    :root{
+      --font:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+
+      --bg:#070A14;
+      --bg2:#090E1F;
+      --text:#EAF0FF;
+      --muted:rgba(234,240,255,.72);
+      --muted2:rgba(234,240,255,.55);
+
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.12);
+
+      --shadow:0 18px 60px rgba(0,0,0,.55);
+      --shadow2:0 10px 30px rgba(0,0,0,.45);
+
+      --accent:#7C5CFF;
+      --accent2:#19D3FF;
+      --good:#27F0A4;
+
+      --ring:0 0 0 3px rgba(124,92,255,.25);
+
+      --radius-lg:22px;
+      --radius-md:16px;
+      --radius-sm:12px;
+
+      --container:1040px;
+      --gutter:clamp(14px,2.2vw,24px);
+
+      --nav-h:78px;
+      --ease:cubic-bezier(.2,.9,.2,1);
+
+      /* Progress bar (same idea as pro2) */
+      --pb-h:3px;
+      --pb:0%;
+
+      /* App-specific */
+      --tabs-h:56px;
+      --mini-h:74px;
+      --sheet: rgba(10,14,30,.92);
+    }
+    [data-theme="light"]{
+      --bg:#F7F9FF;
+      --bg2:#EEF3FF;
+      --text:#0B1020;
+      --muted:rgba(11,16,32,.72);
+      --muted2:rgba(11,16,32,.55);
+
+      --card:rgba(255,255,255,.78);
+      --stroke:rgba(11,16,32,.12);
+
+      --shadow:0 18px 60px rgba(8,12,22,.12);
+      --shadow2:0 10px 30px rgba(8,12,22,.10);
+
+      --ring:0 0 0 3px rgba(124,92,255,.18);
+      --sheet: rgba(255,255,255,.92);
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+    }
+
+    *{box-sizing:border-box}
+    html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+    body{
+      margin:0;
+      font-family:var(--font);
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.6;
+      overflow-x:hidden;
+      padding-top:var(--nav-h);
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--mini-h) + 18px);
+      background-image:
+        radial-gradient(1200px 700px at 10% 0%, rgba(124,92,255,.22), transparent 55%),
+        radial-gradient(900px 560px at 90% 10%, rgba(25,211,255,.18), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      background-attachment: fixed;
+    }
+    a{color:inherit;text-decoration:none}
+    button,input{font:inherit}
+    :where(a,button,input):focus-visible{outline:none;box-shadow:var(--ring);border-color:rgba(124,92,255,.55)!important}
+
+    .container{width:min(var(--container),calc(100% - (var(--gutter)*2)));margin-inline:auto}
+    .wrap-anywhere{overflow-wrap:anywhere;word-break:break-word}
+
+    /* Progress bar */
+    .progressbar{position:fixed;top:0;left:0;right:0;z-index:2600;height:var(--pb-h);pointer-events:none}
+    .progressbar > i{
+      display:block;height:100%;width:var(--pb);
+      background:linear-gradient(90deg, rgba(124,92,255,1), rgba(25,211,255,1), rgba(39,240,164,1));
+      box-shadow: 0 0 18px rgba(124,92,255,.35);
+      border-radius:999px;
+      transition: width 420ms var(--ease);
+    }
+
+    /* Top nav */
+    .nav{
+      position:fixed;inset:0 0 auto 0;z-index:2000;height:var(--nav-h);
+      display:flex;align-items:center;
+      background: linear-gradient(180deg, rgba(7,10,20,0.95), rgba(9,14,31,0.98));
+      border-bottom:2px solid rgba(124,92,255,0.25);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+    [data-theme="light"] .nav{
+      background: linear-gradient(180deg, rgba(247,249,255,0.98), rgba(238,243,255,0.95));
+      border-bottom:2px solid rgba(124,92,255,0.2);
+      box-shadow: 0 10px 40px rgba(8,12,22,0.1);
+    }
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .nav-title{
+      font-size:1.18rem;
+      font-weight:950;
+      letter-spacing:-.01em;
+      display:flex;align-items:center;gap:10px;
+    }
+    .nav-title .dot{
+      width:10px;height:10px;border-radius:99px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 0 0 6px rgba(124,92,255,.12);
+    }
+    .nav-actions{display:flex;align-items:center;gap:10px}
+
+    .icon-btn{
+      width:44px;height:44px;border-radius:16px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--text);cursor:pointer;
+      box-shadow:0 10px 24px rgba(0,0,0,.15);
+      transition: transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+      display:inline-flex;align-items:center;justify-content:center;
+    }
+    [data-theme="light"] .icon-btn{box-shadow:0 10px 22px rgba(8,12,22,.08)}
+    .icon-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16)}
+    .icon-btn:active{transform:translateY(0) scale(.98)}
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      padding:12px 14px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:var(--text);font-weight:950;letter-spacing:.2px;
+      cursor:pointer;user-select:none;white-space:nowrap;
+      box-shadow:0 14px 30px rgba(0,0,0,.20);
+      transition: transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease), box-shadow .2s var(--ease);
+    }
+    [data-theme="light"] .btn{box-shadow:0 14px 26px rgba(8,12,22,.09)}
+    .btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.20);background:rgba(255,255,255,.09)}
+    .btn:active{transform:translateY(0) scale(.99)}
+    .btn.primary{
+      background:linear-gradient(135deg,rgba(124,92,255,.95),rgba(25,211,255,.85));
+      border-color:rgba(255,255,255,.20);
+      box-shadow:0 18px 40px rgba(124,92,255,.18);
+    }
+    .btn.small{padding:10px 12px;border-radius:14px;font-size:.92rem}
+
+    .card{
+      border-radius:var(--radius-lg);
+      background:var(--card);
+      border:1px solid var(--stroke);
+      box-shadow:var(--shadow2);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      position:relative;overflow:hidden;
+    }
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--muted);
+      font-weight:950;font-size:.86rem;
+      white-space:nowrap;
+    }
+
+    .search-block{
+      width: min(540px, 100%);
+      display:flex;align-items:center;gap:10px;
+      padding:12px 12px;border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05);
+      box-shadow:0 12px 28px rgba(0,0,0,.16);
+      min-width:0;
+      transition: transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+    }
+    [data-theme="light"] .search-block{border-color:rgba(11,16,32,.12);background:rgba(255,255,255,.72);box-shadow:0 12px 26px rgba(8,12,22,.09)}
+    .search-block:focus-within{border-color:rgba(124,92,255,.42);background:rgba(124,92,255,.08);transform:translateY(-1px)}
+    .search-block i{color:var(--muted)}
+    .search-block input{
+      border:none!important;background:transparent!important;padding:0!important;
+      outline:none!important;box-shadow:none!important;
+      color:var(--text);width:100%;min-width:0;
+      font-weight:800;font-size:.98rem;
+    }
+    .search-block input::placeholder{color:var(--muted2);font-weight:800}
+    .clear-btn{
+      width:40px;height:40px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      color:var(--text);cursor:pointer;
+      display:grid;place-items:center;
+      transition: transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease), opacity .2s var(--ease);
+      opacity:0;pointer-events:none;
+    }
+    [data-theme="light"] .clear-btn{border-color:rgba(11,16,32,.12);background:rgba(11,16,32,.03)}
+    .clear-btn.show{opacity:1;pointer-events:auto}
+    .clear-btn:hover{transform:translateY(-1px);border-color:rgba(124,92,255,.30);background:rgba(124,92,255,.10)}
+
+    /* =========================
+       Samsung-like library layout
+       ========================= */
+    main{padding: 18px 0 24px}
+
+    .tabs{
+      position: sticky;
+      top: var(--nav-h);
+      z-index: 1500;
+      height: var(--tabs-h);
+      display:flex;align-items:flex-end;justify-content:flex-start;
+      gap: 24px;
+      padding: 0 var(--gutter);
+      background: linear-gradient(180deg, rgba(7,10,20,0.75), rgba(7,10,20,0.18));
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    [data-theme="light"] .tabs{
+      background: linear-gradient(180deg, rgba(247,249,255,.88), rgba(247,249,255,.55));
+      border-bottom-color: rgba(11,16,32,.10);
+    }
+    .tab{
+      position: relative;
+      padding: 10px 2px 12px;
+      color: var(--muted2);
+      font-weight: 950;
+      letter-spacing: -.01em;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab.active{
+      color: var(--text);
+      font-size: 1.55rem;
+      padding-bottom: 10px;
+    }
+    .tab:not(.active){font-size: 1.05rem; opacity:.9}
+    .tab.active::after{
+      content:"";
+      position:absolute;
+      left:0;right:0;bottom:6px;
+      height:3px;border-radius:99px;
+      background: linear-gradient(90deg, rgba(124,92,255,1), rgba(25,211,255,1));
+      box-shadow: 0 0 18px rgba(124,92,255,.25);
+    }
+
+    .top-tools{
+      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      padding: 0 var(--gutter);
+      margin-top: 12px;
+    }
+
+    .list-wrap{
+      position: relative;
+      padding: 0 var(--gutter);
+      margin-top: 12px;
+    }
+
+    .tracklist{
+      border-radius: 22px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow: hidden;
+      box-shadow: 0 16px 46px rgba(0,0,0,.22);
+    }
+    [data-theme="light"] .tracklist{
+      background: rgba(255,255,255,.62);
+      border-color: rgba(11,16,32,.12);
+      box-shadow: 0 14px 40px rgba(8,12,22,.10)
+    }
+
+    .letter-head{
+      padding: 10px 14px;
+      font-weight: 950;
+      color: var(--muted);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      font-size: .78rem;
+      background: rgba(255,255,255,.03);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+    }
+    [data-theme="light"] .letter-head{
+      background: rgba(11,16,32,.03);
+      border-bottom-color: rgba(11,16,32,.08)
+    }
+
+    .row{
+      display:flex;align-items:center;gap:12px;
+      padding: 14px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      cursor:pointer;
+      user-select:none;
+      min-width:0;
+      transition: background .18s var(--ease), transform .18s var(--ease), border-color .18s var(--ease);
+    }
+    [data-theme="light"] .row{border-bottom-color: rgba(11,16,32,.08)}
+    .row:hover{background: rgba(124,92,255,.08)}
+    .row:active{transform: scale(.998)}
+    .row.active{
+      background: linear-gradient(135deg, rgba(124,92,255,.92), rgba(25,211,255,.80));
+      border-bottom-color: rgba(255,255,255,.12);
+    }
+
+    .row .ico{
+      width:46px;height:46px;border-radius:16px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      display:grid;place-items:center;
+      flex:0 0 auto;
+      overflow:hidden;
+    }
+    .row .ico img{width:100%;height:100%;object-fit:cover;display:block}
+    .row .meta{min-width:0;flex:1}
+    .row .t{
+      margin:0;
+      font-weight: 950;
+      letter-spacing: -.01em;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .row .a{
+      margin:2px 0 0;
+      color: var(--muted2);
+      font-weight: 800;
+      font-size: .92rem;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .row.active .t,
+    .row.active .a{color: rgba(11,16,32,.92)}
+
+    .row .more{
+      width:44px;height:44px;border-radius:16px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      display:grid;place-items:center;
+      flex:0 0 auto;
+      transition: background .18s var(--ease), border-color .18s var(--ease), color .18s var(--ease);
+    }
+    .row:hover .more{background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.10); color: var(--text)}
+    .row.active .more{color: rgba(11,16,32,.85); background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.28)}
+
+    /* A-Z index */
+    .az{
+      position: absolute;
+      right: calc(var(--gutter) + 6px);
+      top: 10px;
+      bottom: 10px;
+      width: 26px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap: 4px;
+      user-select:none;
+      pointer-events:auto;
+      opacity: .92;
+    }
+    .az button{
+      width: 26px;height: 18px;border-radius: 10px;
+      border: 1px solid transparent;background: transparent;
+      color: rgba(234,240,255,.62);
+      font-weight: 950;font-size: .72rem;
+      cursor:pointer;line-height: 1;padding:0;
+      transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease), color .18s var(--ease);
+    }
+    [data-theme="light"] .az button{color: rgba(11,16,32,.55)}
+    .az button:hover{
+      transform: translateY(-1px);
+      background: rgba(124,92,255,.12);
+      border-color: rgba(124,92,255,.22);
+      color: var(--text);
+    }
+    @media (max-height: 680px){ .az{display:none} }
+    @media (max-width: 520px){ .az{right: 10px} .tab.active{font-size:1.35rem} }
+
+    /* Mini player */
+    .miniplayer{
+      position: fixed;
+      left: 0; right: 0;
+      bottom: env(safe-area-inset-bottom, 0px);
+      z-index: 2100;
+      padding: 10px var(--gutter);
+      pointer-events:none;
+    }
+    .mini-card{
+      pointer-events:auto;
+      height: var(--mini-h);
+      display:flex;align-items:center;gap:12px;
+      border-radius: 22px;
+      padding: 10px 12px;
+      background: linear-gradient(180deg, rgba(10,14,30,.92), rgba(7,10,20,.86));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 22px 60px rgba(0,0,0,.55);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    }
+    [data-theme="light"] .mini-card{
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.82));
+      border-color: rgba(11,16,32,.12);
+      box-shadow: 0 18px 50px rgba(8,12,22,.14);
+    }
+    .mini-left{
+      width: 54px;height:54px;border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      overflow:hidden;
+      display:grid;place-items:center;
+      flex:0 0 auto;
+    }
+    .mini-left img{width:100%;height:100%;object-fit:cover;display:block}
+    .mini-meta{min-width:0;flex:1;cursor:pointer}
+    .mini-title{
+      margin:0;font-weight:950;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      letter-spacing:-.01em;font-size: 1.0rem;
+    }
+    .mini-artist{
+      margin:2px 0 0;color: var(--muted2);
+      font-weight: 800;font-size: .86rem;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .mini-actions{display:flex;gap:10px;align-items:center;flex:0 0 auto}
+    .mini-actions .icon-btn{width:46px;height:46px;border-radius:18px}
+
+    /* Full player */
+    .player{
+      position: fixed;
+      inset: 0;
+      z-index: 2600;
+      display:none;
+    }
+    .player.show{display:block}
+    .player .backdrop{
+      position:absolute;inset:0;
+      background:
+        radial-gradient(closest-side at 20% 10%, rgba(124,92,255,.35), transparent 60%),
+        radial-gradient(closest-side at 90% 20%, rgba(25,211,255,.18), transparent 60%),
+        linear-gradient(180deg, rgba(7,10,20,.94), rgba(7,10,20,.96));
+    }
+    .player .bgimg{
+      position:absolute;inset:-60px;
+      background-size: cover;background-position: center;
+      filter: blur(28px) saturate(1.15) contrast(1.05);
+      opacity: .26;
+      transform: scale(1.14);
+    }
+    .player .sheet{
+      position:absolute;inset:0;
+      display:flex;flex-direction:column;
+      padding: 10px var(--gutter) calc(18px + env(safe-area-inset-bottom, 0px));
+    }
+    .p-top{
+      display:flex;align-items:center;justify-content:space-between;
+      padding-top: 8px;
+    }
+    .p-top .icon-btn{background:rgba(255,255,255,.04)}
+    .p-title{
+      text-align:center;
+      font-weight: 950;
+      letter-spacing: -.01em;
+      margin: 12px 0 0;
+      font-size: 1.1rem;
+      opacity: .9;
+    }
+
+    .cover-wrap{
+      margin: 34px auto 22px;
+      width: min(320px, 80vw);
+      aspect-ratio: 1 / 1;
+      border-radius: 40px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 30px 80px rgba(0,0,0,.55);
+      background: rgba(255,255,255,.06);
+      display:grid;place-items:center;
+      position:relative;
+    }
+    .cover-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+    .cover-wrap .disc{
+      position:absolute;inset:auto 16px 16px auto;
+      width: 44px;height:44px;border-radius:18px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.14);
+      display:grid;place-items:center;
+      box-shadow: 0 14px 30px rgba(0,0,0,.22);
+    }
+
+    .p-meta{
+      text-align:center;
+      margin-top: 4px;
+      min-width:0;
+    }
+    .p-meta h2{
+      margin:0;
+      font-size: 1.45rem;
+      font-weight: 950;
+      letter-spacing: -.01em;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .p-meta p{
+      margin: 6px 0 0;
+      color: var(--muted2);
+      font-weight: 800;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+
+    .p-mid{
+      margin-top: 18px;
+      display:flex;align-items:center;justify-content:space-between;
+      gap: 10px;
+    }
+    .p-mid .icon-btn{background: transparent;border-color: transparent;box-shadow:none}
+    .p-mid .icon-btn:hover{background: rgba(255,255,255,.06);border-color: rgba(255,255,255,.10)}
+
+    .seek{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items:center;
+      color: var(--muted2);
+      font-weight: 850;
+      font-size: .92rem;
+    }
+    input[type="range"]{width:100%;accent-color: var(--accent)}
+
+    .p-controls{
+      margin-top: 22px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 22px;
+    }
+    .p-controls .icon-btn{
+      width: 58px;height:58px;border-radius: 22px;
+    }
+    .p-controls .play{
+      width: 74px;height:74px;border-radius: 28px;
+      background: linear-gradient(135deg,rgba(124,92,255,.95),rgba(25,211,255,.85));
+      border-color: rgba(255,255,255,.20);
+      box-shadow: 0 22px 60px rgba(124,92,255,.18);
+    }
+
+    .p-bottom{
+      margin-top:auto;
+      display:flex;align-items:center;justify-content:center;
+      gap: 18px;
+      padding-top: 18px;
+      color: var(--muted);
+      flex-wrap:wrap;
+    }
+    .p-bottom .icon-btn{
+      background: transparent;
+      border-color: transparent;
+      box-shadow:none;
+      width: 54px;height:54px;border-radius: 22px;
+    }
+    .p-bottom .icon-btn:hover{background: rgba(255,255,255,.06);border-color: rgba(255,255,255,.10)}
+
+    .tiny{
+      margin-top: 10px;
+      text-align:center;
+      color: var(--muted2);
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: lowercase;
+      opacity: .92;
+    }
+
+    /* Bottom sheet drawer (Queue / Playlist add / Sort) */
+    .drawer{
+      position: fixed;
+      inset: 0;
+      z-index: 2700;
+      display:none;
+    }
+    .drawer.show{display:block}
+    .drawer .shade{
+      position:absolute;inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(8px);
+    }
+    .drawer .panel{
+      position:absolute;
+      left: 0; right: 0;
+      bottom: 0;
+      border-radius: 26px 26px 0 0;
+      background: var(--sheet);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 -20px 60px rgba(0,0,0,.55);
+      padding: 12px var(--gutter) calc(18px + env(safe-area-inset-bottom, 0px));
+      transform: translateY(8px);
+      opacity: 0;
+      animation: drawerIn .22s var(--ease) forwards;
+      max-height: 82vh;
+      overflow:auto;
+    }
+    [data-theme="light"] .drawer .panel{border-color: rgba(11,16,32,.12); box-shadow: 0 -18px 56px rgba(8,12,22,.14)}
+    @keyframes drawerIn{to{transform:translateY(0);opacity:1}}
+    .grab{
+      width: 54px;height: 5px;border-radius: 999px;
+      background: rgba(255,255,255,.22);
+      margin: 4px auto 10px;
+    }
+    [data-theme="light"] .grab{background: rgba(11,16,32,.18)}
+    .dhead{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      margin-bottom: 10px;
+    }
+    .dhead h3{
+      margin:0;font-size:1.05rem;font-weight:950;letter-spacing:-.01em;
+      display:flex;align-items:center;gap:10px;
+    }
+    .dgrid{display:grid;gap:10px}
+    .ditem{
+      display:flex;align-items:center;gap:12px;
+      padding: 12px;border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      cursor:pointer;
+      transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+    }
+    [data-theme="light"] .ditem{background: rgba(11,16,32,.03); border-color: rgba(11,16,32,.12)}
+    .ditem:hover{transform: translateY(-1px); border-color: rgba(124,92,255,.22); background: rgba(124,92,255,.08)}
+    .ditem .left{
+      width:44px;height:44px;border-radius:16px;
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .ditem .left img{width:100%;height:100%;object-fit:cover;display:block}
+    .ditem .body{min-width:0;flex:1}
+    .ditem .body b{
+      display:block;font-weight:950;letter-spacing:-.01em;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .ditem .body small{
+      display:block;margin-top:2px;
+      color: var(--muted2);
+      font-weight: 800;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+
+    .split{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    }
+    .input{
+      width:100%;
+      padding:14px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      font-weight:800;
+    }
+    [data-theme="light"] .input{border-color:rgba(11,16,32,.12);background:rgba(11,16,32,.03);color:var(--text)}
+
+    /* Little badges */
+    .badge{
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      font-weight: 950;
+      font-size: .8rem;
+      white-space:nowrap;
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 560px){
+      .cover-wrap{border-radius: 34px}
+      .p-controls{gap: 18px}
+      .p-controls .icon-btn{width: 54px;height:54px;border-radius: 20px}
+      .p-controls .play{width: 70px;height:70px;border-radius: 26px}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="progressbar" aria-hidden="true"><i></i></div>
+
+  <!-- NAV -->
+  <nav class="nav" aria-label="Header">
+    <div class="container nav-inner">
+      <div class="nav-title"><span class="dot"></span> ViralBit Music</div>
+
+      <div class="nav-actions">
+        <button class="icon-btn" id="btnSearch" type="button" aria-label="Search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        <button class="icon-btn" id="btnSort" type="button" aria-label="Sort">
+          <i class="fa-solid fa-arrow-up-a-z"></i>
+        </button>
+        <button class="icon-btn" id="btnImport" type="button" aria-label="Import MP3">
+          <i class="fa-solid fa-file-arrow-up"></i>
+        </button>
+        <button class="icon-btn" id="btnTheme" type="button" aria-label="Toggle Theme">
+          <i id="themeIco" class="fa-solid fa-moon"></i>
+        </button>
+        <button class="icon-btn" id="btnMore" type="button" aria-label="More">
+          <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+        <input id="filePick" type="file" accept="audio/*" multiple style="display:none" />
+      </div>
+    </div>
+  </nav>
+
+  <!-- TABS -->
+  <div class="tabs" role="tablist" aria-label="Library tabs">
+    <div class="tab" role="tab" id="tabFav" aria-selected="false">Favourites</div>
+    <div class="tab" role="tab" id="tabPlaylists" aria-selected="false">Playlists</div>
+    <div class="tab active" role="tab" id="tabTracks" aria-selected="true">Tracks</div>
+  </div>
+
+  <main>
+    <!-- TRACKS -->
+    <section id="panelTracks" aria-label="Tracks panel">
+      <div class="top-tools" id="searchWrap" style="display:none;">
+        <div class="search-block" style="flex:1 1 560px;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input id="search" type="search" placeholder="Search tracks..." />
+          <button class="clear-btn" id="clearSearch" type="button" aria-label="Clear">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <span class="pill" id="countPill"><i class="fa-solid fa-music"></i> <span id="count">0</span> tracks</span>
+      </div>
+
+      <div class="list-wrap">
+        <div class="tracklist" id="tracklist" aria-label="Track list"></div>
+        <div class="az" id="az" aria-label="A to Z index"></div>
+      </div>
+    </section>
+
+    <!-- FAVOURITES -->
+    <section id="panelFav" style="display:none;" aria-label="Favourites panel">
+      <div class="top-tools">
+        <span class="pill"><i class="fa-solid fa-heart"></i> favourites</span>
+        <span class="pill"><i class="fa-solid fa-clock"></i> recent plays saved</span>
+      </div>
+      <div class="list-wrap">
+        <div class="tracklist" id="favlist" aria-label="Favourites list"></div>
+      </div>
+    </section>
+
+    <!-- PLAYLISTS -->
+    <section id="panelPlaylists" style="display:none;" aria-label="Playlists panel">
+      <div class="top-tools">
+        <button class="btn small primary" id="btnNewPlaylist" type="button">
+          <i class="fa-solid fa-plus"></i> New playlist
+        </button>
+        <span class="pill"><i class="fa-solid fa-list-ul"></i> saved locally</span>
+      </div>
+
+      <div class="list-wrap">
+        <div class="tracklist" id="playlistsList" aria-label="Playlists list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MINI PLAYER -->
+  <div class="miniplayer" id="miniplayer" style="display:none;">
+    <div class="mini-card card" id="miniOpen" role="button" tabindex="0" aria-label="Open player">
+      <div class="mini-left" id="miniCover">
+        <i class="fa-solid fa-music" style="color:var(--accent2);font-size:1.2rem"></i>
+        <img id="miniImg" alt="" style="display:none" />
+      </div>
+
+      <div class="mini-meta">
+        <p class="mini-title" id="miniTitle">—</p>
+        <p class="mini-artist" id="miniArtist">—</p>
+      </div>
+
+      <div class="mini-actions">
+        <button class="icon-btn" id="miniPrev" type="button" aria-label="Previous">
+          <i class="fa-solid fa-backward-step"></i>
+        </button>
+        <button class="icon-btn" id="miniPlay" type="button" aria-label="Play/Pause">
+          <i id="miniPlayIco" class="fa-solid fa-play"></i>
+        </button>
+        <button class="icon-btn" id="miniNext" type="button" aria-label="Next">
+          <i class="fa-solid fa-forward-step"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL PLAYER -->
+  <section class="player" id="player" aria-label="Now playing">
+    <div class="backdrop"></div>
+    <div class="bgimg" id="bgimg"></div>
+
+    <div class="sheet">
+      <div class="p-top">
+        <button class="icon-btn" id="pClose" type="button" aria-label="Close">
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button class="icon-btn" id="btnQueue" type="button" aria-label="Queue">
+            <i class="fa-solid fa-music"></i>
+          </button>
+          <button class="icon-btn" id="pMore" type="button" aria-label="More">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-title" id="pTopTitle">Now playing</div>
+
+      <div class="cover-wrap" id="coverWrap">
+        <img id="coverImg" alt="" style="display:none" />
+        <i id="coverFallback" class="fa-solid fa-compact-disc" style="font-size:2rem;color:var(--accent2)"></i>
+        <div class="disc"><i class="fa-solid fa-wave-square" style="color:rgba(234,240,255,.85)"></i></div>
+      </div>
+
+      <div class="p-meta">
+        <h2 id="pTitle">—</h2>
+        <p id="pArtist">—</p>
+      </div>
+
+      <div class="p-mid">
+        <button class="icon-btn" id="btnShuffle" type="button" aria-label="Shuffle" title="Shuffle">
+          <i class="fa-solid fa-shuffle"></i>
+        </button>
+        <button class="icon-btn" id="btnLike" type="button" aria-label="Like" title="Like">
+          <i id="likeIco" class="fa-regular fa-heart"></i>
+        </button>
+        <button class="icon-btn" id="btnRepeat" type="button" aria-label="Repeat" title="Repeat">
+          <i class="fa-solid fa-repeat"></i>
+        </button>
+      </div>
+
+      <div class="seek">
+        <span id="cur">0:00</span>
+        <input id="seek" type="range" min="0" max="1000" value="0" aria-label="Seek" />
+        <span id="dur">0:00</span>
+      </div>
+
+      <div class="p-controls">
+        <button class="icon-btn" id="prev" type="button" aria-label="Previous">
+          <i class="fa-solid fa-backward-step"></i>
+        </button>
+
+        <button class="icon-btn play" id="play" type="button" aria-label="Play/Pause">
+          <i id="playIco" class="fa-solid fa-play"></i>
+        </button>
+
+        <button class="icon-btn" id="next" type="button" aria-label="Next">
+          <i class="fa-solid fa-forward-step"></i>
+        </button>
+      </div>
+
+      <div class="p-bottom">
+        <button class="icon-btn" id="btnVol" type="button" aria-label="Mute" title="Mute">
+          <i id="volIco" class="fa-solid fa-volume-high"></i>
+        </button>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume" style="width:min(360px,70vw)" />
+        <button class="icon-btn" id="btnAddToPlaylist" type="button" aria-label="Add to playlist" title="Add to playlist">
+          <i class="fa-solid fa-square-plus"></i>
+        </button>
+      </div>
+
+      <div class="tiny">𝖼𝖺𝗅𝗒𝗑 𝖽𝗋𝖾𝗒 • 𝗏𝗂𝗋𝖺𝗅𝖻𝗂𝗍 𝗍𝖾𝖼𝗁</div>
+    </div>
+  </section>
+
+  <!-- DRAWER (Queue / Sort / Playlist Add / Playlist View) -->
+  <section class="drawer" id="drawer" aria-label="Bottom drawer">
+    <div class="shade" id="drawerShade"></div>
+    <div class="panel" id="drawerPanel">
+      <div class="grab"></div>
+      <div class="dhead">
+        <h3 id="dTitle"><i class="fa-solid fa-music"></i> Queue</h3>
+        <button class="icon-btn" id="dClose" type="button" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="dBody" class="dgrid"></div>
+    </div>
+  </section>
+
+  <audio id="audio" preload="metadata"></audio>
+
+  <script>
+    /* =========================
+       ViralBit Music — Next-level (Samsung-like)
+       Single-file • Frontend-only • APK/PWA ready
+       ========================= */
+
+    const $ = (s) => document.querySelector(s);
+
+    // Put MP3s in /songs/ if you want bundled tracks:
+    const bundled = [
+      // { id:"b1", title:"8D Sakura", artist:"8D Music", src:"songs/8d-sakura.mp3", cover:"covers/cover1.jpg", source:"bundled" },
+    ];
+
+    const el = {
+      // top
+      btnSearch: $("#btnSearch"),
+      btnSort: $("#btnSort"),
+      btnImport: $("#btnImport"),
+      btnTheme: $("#btnTheme"),
+      themeIco: $("#themeIco"),
+      btnMore: $("#btnMore"),
+      filePick: $("#filePick"),
+
+      // tabs
+      tabFav: $("#tabFav"),
+      tabPlaylists: $("#tabPlaylists"),
+      tabTracks: $("#tabTracks"),
+      panelTracks: $("#panelTracks"),
+      panelFav: $("#panelFav"),
+      panelPlaylists: $("#panelPlaylists"),
+
+      // search
+      searchWrap: $("#searchWrap"),
+      search: $("#search"),
+      clearSearch: $("#clearSearch"),
+      count: $("#count"),
+
+      // lists
+      tracklist: $("#tracklist"),
+      favlist: $("#favlist"),
+      playlistsList: $("#playlistsList"),
+      az: $("#az"),
+
+      // mini
+      miniplayer: $("#miniplayer"),
+      miniOpen: $("#miniOpen"),
+      miniImg: $("#miniImg"),
+      miniCover: $("#miniCover"),
+      miniTitle: $("#miniTitle"),
+      miniArtist: $("#miniArtist"),
+      miniPrev: $("#miniPrev"),
+      miniPlay: $("#miniPlay"),
+      miniPlayIco: $("#miniPlayIco"),
+      miniNext: $("#miniNext"),
+
+      // player
+      player: $("#player"),
+      bgimg: $("#bgimg"),
+      pClose: $("#pClose"),
+      pMore: $("#pMore"),
+      btnQueue: $("#btnQueue"),
+      pTopTitle: $("#pTopTitle"),
+      coverImg: $("#coverImg"),
+      coverFallback: $("#coverFallback"),
+      pTitle: $("#pTitle"),
+      pArtist: $("#pArtist"),
+      btnShuffle: $("#btnShuffle"),
+      btnLike: $("#btnLike"),
+      likeIco: $("#likeIco"),
+      btnRepeat: $("#btnRepeat"),
+      cur: $("#cur"),
+      dur: $("#dur"),
+      seek: $("#seek"),
+      prev: $("#prev"),
+      play: $("#play"),
+      playIco: $("#playIco"),
+      next: $("#next"),
+      btnVol: $("#btnVol"),
+      volIco: $("#volIco"),
+      vol: $("#vol"),
+      btnAddToPlaylist: $("#btnAddToPlaylist"),
+
+      // playlists
+      btnNewPlaylist: $("#btnNewPlaylist"),
+
+      // drawer
+      drawer: $("#drawer"),
+      drawerShade: $("#drawerShade"),
+      drawerPanel: $("#drawerPanel"),
+      dClose: $("#dClose"),
+      dTitle: $("#dTitle"),
+      dBody: $("#dBody"),
+
+      // audio
+      audio: $("#audio"),
+      pb: document.querySelector(".progressbar > i"),
+    };
+
+    const store = {
+      get(k, fallback){
+        try{ return JSON.parse(localStorage.getItem(k)) ?? fallback; }
+        catch{ return fallback; }
+      },
+      set(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
+    };
+
+    // Persistent state
+    let tracks = [...bundled];
+    let filtered = [];
+    let currentIndex = -1;
+
+    let liked = new Set(store.get("vb_liked", []));
+    let recents = store.get("vb_recents", []);
+    let shuffleOn = store.get("vb_shuffle", false);
+    let repeatMode = store.get("vb_repeat", "off"); // off | all | one
+    let sortMode = store.get("vb_sort", "az"); // az | artist | recent
+    let last = store.get("vb_last", { id:null, time:0, volume:0.9, muted:false });
+
+    // Queue: a list of track ids (play order)
+    let queue = store.get("vb_queue", []); // array of ids
+    let queuePos = store.get("vb_queuePos", 0);
+
+    // Playlists: { id, name, items:[trackId] }
+    let playlists = store.get("vb_playlists", []);
+
+    // Shuffle order cache
+    let shuffleOrder = [];
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
+    }
+
+    function fmtTime(sec){
+      if(!isFinite(sec) || sec < 0) return "0:00";
+      const m = Math.floor(sec/60);
+      const s = Math.floor(sec%60);
+      return `${m}:${String(s).padStart(2,"0")}`;
+    }
+
+    function setTheme(next){
+      document.documentElement.setAttribute("data-theme", next);
+      store.set("vb_theme", next);
+      el.themeIco.className = (next === "dark") ? "fa-solid fa-moon" : "fa-solid fa-sun";
+    }
+
+    function setPb(pct){
+      const clamped = Math.max(0, Math.min(100, pct));
+      document.documentElement.style.setProperty("--pb", clamped.toFixed(2) + "%");
+    }
+
+    function ensureShuffleOrder(){
+      if(!shuffleOn) return;
+      if(shuffleOrder.length !== queue.length){
+        shuffleOrder = Array.from({length:queue.length},(_,i)=>i);
+        for(let i=shuffleOrder.length-1;i>0;i--){
+          const j = Math.floor(Math.random()*(i+1));
+          [shuffleOrder[i],shuffleOrder[j]] = [shuffleOrder[j],shuffleOrder[i]];
+        }
+      }
+    }
+
+    function currentTrack(){
+      if(currentIndex < 0 || currentIndex >= tracks.length) return null;
+      return tracks[currentIndex];
+    }
+
+    function persistAll(){
+      store.set("vb_liked", Array.from(liked));
+      store.set("vb_recents", recents);
+      store.set("vb_shuffle", shuffleOn);
+      store.set("vb_repeat", repeatMode);
+      store.set("vb_sort", sortMode);
+      store.set("vb_queue", queue);
+      store.set("vb_queuePos", queuePos);
+      store.set("vb_playlists", playlists);
+    }
+
+    function persistLast(){
+      store.set("vb_last", {
+        id: tracks[currentIndex]?.id ?? null,
+        time: el.audio.currentTime || 0,
+        volume: el.audio.volume,
+        muted: el.audio.muted
+      });
+    }
+
+    function markRecent(id){
+      if(!id) return;
+      recents = recents.filter(x => x !== id);
+      recents.unshift(id);
+      recents = recents.slice(0, 80);
+      store.set("vb_recents", recents);
+    }
+
+    function buildDefaultQueueIfNeeded(){
+      // Build queue from tracks if empty or invalid
+      const ids = new Set(tracks.map(t => t.id));
+      const cleaned = (queue || []).filter(id => ids.has(id));
+      if(!cleaned.length){
+        queue = tracks.map(t => t.id);
+        queuePos = 0;
+        persistAll();
+        return;
+      }
+      queue = cleaned;
+      if(queuePos < 0) queuePos = 0;
+      if(queuePos >= queue.length) queuePos = Math.max(0, queue.length - 1);
+      persistAll();
+    }
+
+    function setActiveRows(){
+      const id = tracks[currentIndex]?.id || "";
+      document.querySelectorAll(".row[data-id]").forEach(r=>{
+        r.classList.toggle("active", r.dataset.id === id);
+      });
+    }
+
+    function applyMedia(t){
+      // mini
+      el.miniplayer.style.display = t ? "block" : "none";
+      el.miniTitle.textContent = t?.title || "—";
+      el.miniArtist.textContent = t?.artist || "—";
+
+      // player
+      el.pTitle.textContent = t?.title || "—";
+      el.pArtist.textContent = t?.artist || "—";
+      el.pTopTitle.textContent = t ? "Now playing" : "—";
+
+      // cover + bg
+      if(t?.cover){
+        el.miniImg.src = t.cover;
+        el.miniImg.style.display = "block";
+        el.miniCover.querySelector("i").style.display = "none";
+
+        el.coverImg.src = t.cover;
+        el.coverImg.style.display = "block";
+        el.coverFallback.style.display = "none";
+
+        el.bgimg.style.backgroundImage = `url('${t.cover}')`;
+      }else{
+        el.miniImg.style.display = "none";
+        el.miniImg.removeAttribute("src");
+        el.miniCover.querySelector("i").style.display = "block";
+
+        el.coverImg.style.display = "none";
+        el.coverImg.removeAttribute("src");
+        el.coverFallback.style.display = "block";
+
+        el.bgimg.style.backgroundImage = "";
+      }
+
+      const isLiked = t ? liked.has(t.id) : false;
+      el.likeIco.className = isLiked ? "fa-solid fa-heart" : "fa-regular fa-heart";
+
+      // tint states
+      el.btnShuffle.style.color = shuffleOn ? "var(--text)" : "var(--muted)";
+      el.btnRepeat.style.color = (repeatMode === "off") ? "var(--muted)" : "var(--text)";
+      el.btnRepeat.title = `repeat: ${repeatMode}`;
+    }
+
+    function updatePlayIcons(){
+      const paused = el.audio.paused;
+      el.playIco.className = paused ? "fa-solid fa-play" : "fa-solid fa-pause";
+      el.miniPlayIco.className = paused ? "fa-solid fa-play" : "fa-solid fa-pause";
+    }
+
+    function openPlayer(){ el.player.classList.add("show"); }
+    function closePlayer(){ el.player.classList.remove("show"); }
+
+    function openDrawer(titleHtml, bodyNodeOrHtml){
+      el.dTitle.innerHTML = titleHtml;
+      el.dBody.innerHTML = "";
+      if(typeof bodyNodeOrHtml === "string"){
+        el.dBody.innerHTML = bodyNodeOrHtml;
+      }else{
+        el.dBody.appendChild(bodyNodeOrHtml);
+      }
+      el.drawer.classList.add("show");
+    }
+    function closeDrawer(){ el.drawer.classList.remove("show"); }
+
+    async function playIndex(idx, userAction=false){
+      if(idx < 0 || idx >= tracks.length) return;
+      currentIndex = idx;
+
+      const t = tracks[currentIndex];
+      applyMedia(t);
+      setActiveRows();
+
+      el.audio.src = t.src;
+      el.audio.load();
+
+      // restore time if same track
+      const saved = store.get("vb_last", null);
+      if(saved?.id === t.id && isFinite(saved.time) && saved.time > 0){
+        el.audio.addEventListener("loadedmetadata", () => {
+          if(saved.time < el.audio.duration) el.audio.currentTime = saved.time;
+        }, { once:true });
+      }
+
+      if(userAction){
+        try{ await el.audio.play(); }catch{}
+      }
+      updatePlayIcons();
+
+      markRecent(t.id);
+      persistLast();
+      updateMediaSession();
+    }
+
+    function togglePlay(){
+      if(currentIndex === -1){
+        if(tracks.length){
+          // start from queue position
+          const id = queue[queuePos] ?? tracks[0].id;
+          const idx = tracks.findIndex(t => t.id === id);
+          playIndex(idx === -1 ? 0 : idx, true);
+        }
+        return;
+      }
+      if(el.audio.paused){
+        el.audio.play().then(updatePlayIcons).catch(()=>{});
+      }else{
+        el.audio.pause();
+        updatePlayIcons();
+      }
+    }
+
+    function stepQueue(delta){
+      if(queue.length === 0) return;
+      if(shuffleOn){
+        ensureShuffleOrder();
+        const posInShuffle = shuffleOrder.indexOf(queuePos);
+        let nextShufflePos = posInShuffle + delta;
+        if(nextShufflePos < 0) nextShufflePos = (repeatMode === "all") ? shuffleOrder.length - 1 : 0;
+        if(nextShufflePos >= shuffleOrder.length) nextShufflePos = (repeatMode === "all") ? 0 : shuffleOrder.length - 1;
+        queuePos = shuffleOrder[nextShufflePos];
+      }else{
+        queuePos += delta;
+        if(queuePos < 0) queuePos = (repeatMode === "all") ? queue.length - 1 : 0;
+        if(queuePos >= queue.length) queuePos = (repeatMode === "all") ? 0 : queue.length - 1;
+      }
+      store.set("vb_queuePos", queuePos);
+
+      const id = queue[queuePos];
+      const idx = tracks.findIndex(t => t.id === id);
+      if(idx !== -1) playIndex(idx, true);
+    }
+
+    function next(){
+      if(repeatMode === "one"){
+        el.audio.currentTime = 0;
+        el.audio.play();
+        return;
+      }
+      stepQueue(+1);
+    }
+    function prev(){
+      if(el.audio.currentTime > 3){
+        el.audio.currentTime = 0;
+        return;
+      }
+      stepQueue(-1);
+    }
+
+    function toggleLike(){
+      const t = currentTrack();
+      if(!t) return;
+      if(liked.has(t.id)) liked.delete(t.id);
+      else liked.add(t.id);
+      persistAll();
+      applyMedia(t);
+      rebuildFav();
+    }
+
+    function toggleShuffle(){
+      shuffleOn = !shuffleOn;
+      shuffleOrder = [];
+      ensureShuffleOrder();
+      persistAll();
+      applyMedia(currentTrack());
+    }
+
+    function cycleRepeat(){
+      repeatMode = (repeatMode === "off") ? "all" : (repeatMode === "all" ? "one" : "off");
+      persistAll();
+      applyMedia(currentTrack());
+    }
+
+    function toggleMute(){
+      el.audio.muted = !el.audio.muted;
+      el.volIco.className = el.audio.muted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-high";
+      persistLast();
+    }
+
+    function importFiles(files){
+      const arr = Array.from(files || []);
+      if(!arr.length) return;
+
+      const imported = arr.map((f, i) => {
+        const url = URL.createObjectURL(f);
+        const name = (f.name || "Imported").replace(/\.[^.]+$/, "");
+        return {
+          id: `i_${Date.now()}_${i}_${Math.random().toString(16).slice(2)}`,
+          title: name,
+          artist: "Local Storage",
+          src: url,
+          cover: "",
+          source: "import",
+        };
+      });
+
+      tracks = [...tracks, ...imported];
+      buildDefaultQueueIfNeeded(); // will keep existing if valid
+      // ensure queue contains all tracks
+      const inQueue = new Set(queue);
+      tracks.forEach(t => { if(!inQueue.has(t.id)) queue.push(t.id); });
+      persistAll();
+
+      rebuildTracks();
+      rebuildFav();
+      rebuildPlaylistsList();
+
+      if(currentIndex === -1 && tracks.length){
+        // start but don't autoplay
+        const id = queue[queuePos] ?? tracks[0].id;
+        const idx = tracks.findIndex(t => t.id === id);
+        playIndex(idx === -1 ? 0 : idx, false);
+      }
+    }
+
+    function groupByLetter(list){
+      const map = new Map();
+      list.forEach(t=>{
+        const raw = (t.title || "Unknown").trim();
+        const ch = (raw[0] || "#").toUpperCase();
+        const key = /[A-Z]/.test(ch) ? ch : "#";
+        if(!map.has(key)) map.set(key, []);
+        map.get(key).push(t);
+      });
+      const keys = ["#"].concat(Array.from({length:26},(_,i)=>String.fromCharCode(65+i)));
+      return keys.filter(k => map.has(k)).map(k => [k, map.get(k)]);
+    }
+
+    function buildAzIndex(letterIds){
+      el.az.innerHTML = "";
+      const letters = Array.from({length:26},(_,i)=>String.fromCharCode(65+i));
+      letters.forEach(L=>{
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = L;
+        b.title = `Jump to ${L}`;
+        b.addEventListener("click", ()=>{
+          const id = letterIds.get(L);
+          if(id){
+            const node = document.getElementById(id);
+            if(node) node.scrollIntoView({behavior:"smooth", block:"start"});
+          }
+        });
+        el.az.appendChild(b);
+      });
+    }
+
+    function sortTracks(list){
+      const out = [...list];
+      if(sortMode === "artist"){
+        out.sort((a,b)=> (a.artist||"").localeCompare(b.artist||"") || (a.title||"").localeCompare(b.title||""));
+      } else if(sortMode === "recent"){
+        const rank = new Map(recents.map((id, i)=> [id, i]));
+        out.sort((a,b)=> (rank.get(a.id) ?? 999999) - (rank.get(b.id) ?? 999999));
+      } else {
+        out.sort((a,b)=> (a.title||"").localeCompare(b.title||""));
+      }
+      return out;
+    }
+
+    function rebuildTracks(){
+      const q = (el.search.value || "").trim().toLowerCase();
+
+      const base = sortTracks(tracks);
+      filtered = !q ? base : base.filter(t => (`${t.title||""} ${t.artist||""}`.toLowerCase().includes(q)));
+      el.clearSearch.classList.toggle("show", !!q);
+      el.count.textContent = String(filtered.length);
+
+      const groups = groupByLetter(filtered);
+      const letterIds = new Map();
+
+      el.tracklist.innerHTML = "";
+      if(!filtered.length){
+        el.tracklist.innerHTML = `
+          <div class="letter-head">EMPTY <span class="badge">import mp3</span></div>
+          <div class="row" style="cursor:default;">
+            <div class="ico"><i class="fa-solid fa-circle-info" style="color:var(--accent2)"></i></div>
+            <div class="meta">
+              <p class="t">No tracks found</p>
+              <p class="a">Import MP3 or add bundled songs</p>
+            </div>
+            <button class="more" type="button" aria-label="More"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          </div>
+        `;
+        buildAzIndex(letterIds);
+        return;
+      }
+
+      groups.forEach(([letter, items])=>{
+        const headId = `head_${letter}_${Math.random().toString(16).slice(2)}`;
+        letterIds.set(letter, headId);
+
+        const head = document.createElement("div");
+        head.className = "letter-head";
+        head.id = headId;
+        head.innerHTML = `${escapeHtml(letter)} <span class="badge">${items.length}</span>`;
+        el.tracklist.appendChild(head);
+
+        items.forEach(t=>{
+          const row = document.createElement("div");
+          row.className = "row";
+          row.dataset.id = t.id;
+
+          const ico = document.createElement("div");
+          ico.className = "ico";
+          if(t.cover){
+            ico.innerHTML = `<img src="${escapeHtml(t.cover)}" alt="">`;
+          }else{
+            ico.innerHTML = `<i class="fa-solid fa-music" style="color:var(--accent2)"></i>`;
+          }
+
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          meta.innerHTML = `
+            <p class="t">${escapeHtml(t.title || "Untitled")}</p>
+            <p class="a">${escapeHtml(t.artist || "Unknown")}</p>
+          `;
+
+          const more = document.createElement("button");
+          more.className = "more";
+          more.type = "button";
+          more.innerHTML = `<i class="fa-solid fa-ellipsis-vertical"></i>`;
+          more.addEventListener("click", (e)=>{
+            e.stopPropagation();
+            openTrackMenu(t);
+          });
+
+          row.appendChild(ico);
+          row.appendChild(meta);
+          row.appendChild(more);
+
+          row.addEventListener("click", ()=>{
+            // set queuePos to this track in queue, then play
+            const qp = queue.indexOf(t.id);
+            if(qp !== -1){ queuePos = qp; store.set("vb_queuePos", queuePos); }
+            const idx = tracks.findIndex(x => x.id === t.id);
+            playIndex(idx, true);
+          });
+
+          el.tracklist.appendChild(row);
+        });
+      });
+
+      buildAzIndex(letterIds);
+      setActiveRows();
+    }
+
+    function rebuildFav(){
+      const fav = sortTracks(tracks.filter(t => liked.has(t.id)));
+      const groups = groupByLetter(fav);
+
+      el.favlist.innerHTML = "";
+      if(!fav.length){
+        el.favlist.innerHTML = `
+          <div class="letter-head">FAVOURITES <span class="badge">empty</span></div>
+          <div class="row" style="cursor:default;">
+            <div class="ico"><i class="fa-regular fa-heart" style="color:var(--accent2)"></i></div>
+            <div class="meta">
+              <p class="t">No favourites yet</p>
+              <p class="a">Tap ❤ in player or ⋮ on a track</p>
+            </div>
+            <button class="more" type="button"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          </div>
+        `;
+        return;
+      }
+
+      groups.forEach(([letter, items])=>{
+        const head = document.createElement("div");
+        head.className = "letter-head";
+        head.innerHTML = `${escapeHtml(letter)} <span class="badge">${items.length}</span>`;
+        el.favlist.appendChild(head);
+
+        items.forEach(t=>{
+          const row = document.createElement("div");
+          row.className = "row";
+          row.dataset.id = t.id;
+
+          const ico = document.createElement("div");
+          ico.className = "ico";
+          ico.innerHTML = t.cover
+            ? `<img src="${escapeHtml(t.cover)}" alt="">`
+            : `<i class="fa-solid fa-music" style="color:var(--accent2)"></i>`;
+
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          meta.innerHTML = `
+            <p class="t">${escapeHtml(t.title || "Untitled")}</p>
+            <p class="a">${escapeHtml(t.artist || "Unknown")}</p>
+          `;
+
+          const more = document.createElement("button");
+          more.className = "more";
+          more.type = "button";
+          more.innerHTML = `<i class="fa-solid fa-ellipsis-vertical"></i>`;
+          more.addEventListener("click", (e)=>{
+            e.stopPropagation();
+            openTrackMenu(t);
+          });
+
+          row.appendChild(ico);
+          row.appendChild(meta);
+          row.appendChild(more);
+
+          row.addEventListener("click", ()=>{
+            const qp = queue.indexOf(t.id);
+            if(qp !== -1){ queuePos = qp; store.set("vb_queuePos", queuePos); }
+            const idx = tracks.findIndex(x => x.id === t.id);
+            playIndex(idx, true);
+          });
+
+          el.favlist.appendChild(row);
+        });
+      });
+
+      setActiveRows();
+    }
+
+    function rebuildPlaylistsList(){
+      el.playlistsList.innerHTML = "";
+      if(!playlists.length){
+        el.playlistsList.innerHTML = `
+          <div class="letter-head">PLAYLISTS <span class="badge">0</span></div>
+          <div class="row" style="cursor:default;">
+            <div class="ico"><i class="fa-solid fa-list-ul" style="color:var(--accent2)"></i></div>
+            <div class="meta">
+              <p class="t">No playlists yet</p>
+              <p class="a">Create one and add songs</p>
+            </div>
+            <button class="more" type="button"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          </div>
+        `;
+        return;
+      }
+
+      // List playlists like tracks
+      const head = document.createElement("div");
+      head.className = "letter-head";
+      head.innerHTML = `PLAYLISTS <span class="badge">${playlists.length}</span>`;
+      el.playlistsList.appendChild(head);
+
+      playlists.forEach(pl=>{
+        const row = document.createElement("div");
+        row.className = "row";
+        row.dataset.pid = pl.id;
+
+        const ico = document.createElement("div");
+        ico.className = "ico";
+        ico.innerHTML = `<i class="fa-solid fa-list-ul" style="color:var(--accent2)"></i>`;
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.innerHTML = `
+          <p class="t">${escapeHtml(pl.name)}</p>
+          <p class="a">${pl.items.length} songs</p>
+        `;
+
+        const more = document.createElement("button");
+        more.className = "more";
+        more.type = "button";
+        more.innerHTML = `<i class="fa-solid fa-ellipsis-vertical"></i>`;
+        more.addEventListener("click", (e)=>{
+          e.stopPropagation();
+          openPlaylistMenu(pl);
+        });
+
+        row.appendChild(ico);
+        row.appendChild(meta);
+        row.appendChild(more);
+
+        row.addEventListener("click", ()=> openPlaylistView(pl));
+
+        el.playlistsList.appendChild(row);
+      });
+    }
+
+    /* Menus + drawers */
+    function openTrackMenu(t){
+      const isLiked = liked.has(t.id);
+      const wrapper = document.createElement("div");
+      wrapper.className = "dgrid";
+
+      const item = (icon, title, sub, onClick) => {
+        const d = document.createElement("div");
+        d.className = "ditem";
+        d.innerHTML = `
+          <div class="left"><i class="${icon}" style="color:var(--accent2)"></i></div>
+          <div class="body"><b>${escapeHtml(title)}</b><small>${escapeHtml(sub)}</small></div>
+          <div class="badge">tap</div>
+        `;
+        d.addEventListener("click", ()=>{ closeDrawer(); onClick(); });
+        return d;
+      };
+
+      wrapper.appendChild(item(isLiked ? "fa-solid fa-heart" : "fa-regular fa-heart",
+        isLiked ? "Remove from favourites" : "Add to favourites",
+        "Saved locally", ()=>{
+          if(isLiked) liked.delete(t.id); else liked.add(t.id);
+          persistAll(); applyMedia(currentTrack()); rebuildFav();
+        }
+      ));
+
+      wrapper.appendChild(item("fa-solid fa-forward",
+        "Play next in queue",
+        "Adds right after current", ()=>{
+          const id = t.id;
+          // remove existing
+          queue = queue.filter(x=>x!==id);
+          // insert after current queuePos
+          const at = Math.min(queue.length, queuePos + 1);
+          queue.splice(at, 0, id);
+          persistAll();
+        }
+      ));
+
+      wrapper.appendChild(item("fa-solid fa-plus",
+        "Add to playlist",
+        "Choose playlist", ()=>{
+          openAddToPlaylistDrawer(t);
+        }
+      ));
+
+      wrapper.appendChild(item("fa-solid fa-list",
+        "Set as queue (from this song)",
+        "Queue continues from here", ()=>{
+          const idx = tracks.findIndex(x=>x.id===t.id);
+          if(idx === -1) return;
+          // make queue from all tracks sorted currently by sortMode
+          const order = sortTracks(tracks).map(x=>x.id);
+          queue = order;
+          queuePos = queue.indexOf(t.id);
+          shuffleOrder = [];
+          persistAll();
+          playIndex(idx, true);
+        }
+      ));
+
+      openDrawer(`<i class="fa-solid fa-ellipsis"></i> Track options`, wrapper);
+    }
+
+    function openPlaylistMenu(pl){
+      const wrapper = document.createElement("div");
+      wrapper.className = "dgrid";
+
+      const item = (icon, title, sub, onClick) => {
+        const d = document.createElement("div");
+        d.className = "ditem";
+        d.innerHTML = `
+          <div class="left"><i class="${icon}" style="color:var(--accent2)"></i></div>
+          <div class="body"><b>${escapeHtml(title)}</b><small>${escapeHtml(sub)}</small></div>
+          <div class="badge">tap</div>
+        `;
+        d.addEventListener("click", ()=>{ closeDrawer(); onClick(); });
+        return d;
+      };
+
+      wrapper.appendChild(item("fa-solid fa-play", "Play playlist", "Starts queue from playlist", ()=>{
+        setQueueFromPlaylist(pl);
+      }));
+
+      wrapper.appendChild(item("fa-solid fa-pen", "Rename playlist", "Change name", ()=>{
+        openRenamePlaylistDrawer(pl);
+      }));
+
+      wrapper.appendChild(item("fa-solid fa-trash", "Delete playlist", "Removes playlist only", ()=>{
+        playlists = playlists.filter(x=>x.id !== pl.id);
+        persistAll();
+        rebuildPlaylistsList();
+      }));
+
+      openDrawer(`<i class="fa-solid fa-ellipsis"></i> Playlist options`, wrapper);
+    }
+
+    function openPlaylistView(pl){
+      const ids = new Set(pl.items);
+      const list = sortTracks(tracks.filter(t=>ids.has(t.id)));
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "dgrid";
+
+      const top = document.createElement("div");
+      top.className = "split";
+      top.innerHTML = `
+        <span class="pill"><i class="fa-solid fa-list-ul"></i> ${escapeHtml(pl.name)}</span>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+          <button class="btn small primary" id="plPlayBtn" type="button"><i class="fa-solid fa-play"></i> Play</button>
+          <button class="btn small" id="plAddBtn" type="button"><i class="fa-solid fa-plus"></i> Add songs</button>
+        </div>
+      `;
+      wrapper.appendChild(top);
+
+      const listWrap = document.createElement("div");
+      listWrap.className = "dgrid";
+
+      if(!list.length){
+        const empty = document.createElement("div");
+        empty.className = "ditem";
+        empty.innerHTML = `
+          <div class="left"><i class="fa-solid fa-circle-info" style="color:var(--accent2)"></i></div>
+          <div class="body"><b>No songs</b><small>Add tracks to this playlist</small></div>
+          <div class="badge">info</div>
+        `;
+        listWrap.appendChild(empty);
+      }else{
+        list.forEach(t=>{
+          const d = document.createElement("div");
+          d.className = "ditem";
+          d.innerHTML = `
+            <div class="left">${t.cover ? `<img src="${escapeHtml(t.cover)}" alt="">` : `<i class="fa-solid fa-music" style="color:var(--accent2)"></i>`}</div>
+            <div class="body"><b>${escapeHtml(t.title||"Untitled")}</b><small>${escapeHtml(t.artist||"Unknown")}</small></div>
+            <div class="badge">remove</div>
+          `;
+          d.addEventListener("click", ()=>{
+            pl.items = pl.items.filter(id => id !== t.id);
+            playlists = playlists.map(x => x.id === pl.id ? pl : x);
+            persistAll();
+            rebuildPlaylistsList();
+            // refresh drawer view
+            openPlaylistView(pl);
+          });
+          listWrap.appendChild(d);
+        });
+      }
+
+      wrapper.appendChild(listWrap);
+
+      openDrawer(`<i class="fa-solid fa-list-ul"></i> Playlist`, wrapper);
+
+      // attach actions after openDrawer placed content
+      setTimeout(()=>{
+        const playBtn = $("#plPlayBtn");
+        const addBtn = $("#plAddBtn");
+        if(playBtn) playBtn.addEventListener("click", ()=>{ closeDrawer(); setQueueFromPlaylist(pl); });
+        if(addBtn) addBtn.addEventListener("click", ()=>{ closeDrawer(); openAddToPlaylistDrawer(null, pl); });
+      }, 0);
+    }
+
+    function openSortDrawer(){
+      const wrapper = document.createElement("div");
+      wrapper.className = "dgrid";
+
+      const option = (mode, icon, title, sub) => {
+        const active = (sortMode === mode);
+        const d = document.createElement("div");
+        d.className = "ditem";
+        d.innerHTML = `
+          <div class="left"><i class="${icon}" style="color:var(--accent2)"></i></div>
+          <div class="body"><b>${escapeHtml(title)} ${active ? "✓" : ""}</b><small>${escapeHtml(sub)}</small></div>
+          <div class="badge">set</div>
+        `;
+        d.addEventListener("click", ()=>{
+          sortMode = mode;
+          persistAll();
+          closeDrawer();
+          rebuildTracks();
+          rebuildFav();
+        });
+        return d;
+      };
+
+      wrapper.appendChild(option("az","fa-solid fa-arrow-up-a-z","Sort by title","A → Z"));
+      wrapper.appendChild(option("artist","fa-solid fa-user","Sort by artist","Artist name"));
+      wrapper.appendChild(option("recent","fa-solid fa-clock","Sort by recent","Recently played first"));
+
+      openDrawer(`<i class="fa-solid fa-arrow-up-a-z"></i> Sort`, wrapper);
+    }
+
+    function openQueueDrawer(){
+      const wrapper = document.createElement("div");
+      wrapper.className = "dgrid";
+
+      const t = currentTrack();
+      const head = document.createElement("div");
+      head.className = "split";
+      head.innerHTML = `
+        <span class="pill"><i class="fa-solid fa-music"></i> Up next</span>
+        <span class="pill"><i class="fa-solid fa-layer-group"></i> ${queue.length} in queue</span>
+      `;
+      wrapper.appendChild(head);
+
+      if(!queue.length){
+        const empty = document.createElement("div");
+        empty.className = "ditem";
+        empty.innerHTML = `
+          <div class="left"><i class="fa-solid fa-circle-info" style="color:var(--accent2)"></i></div>
+          <div class="body"><b>Queue is empty</b><small>Add tracks first</small></div>
+          <div class="badge">info</div>
+        `;
+        wrapper.appendChild(empty);
+      }else{
+        queue.forEach((id, i)=>{
+          const tr = tracks.find(x=>x.id===id);
+          if(!tr) return;
+          const d = document.createElement("div");
+          d.className = "ditem";
+          d.style.borderColor = (i === queuePos) ? "rgba(124,92,255,.30)" : "";
+          d.style.background = (i === queuePos) ? "rgba(124,92,255,.10)" : "";
+          d.innerHTML = `
+            <div class="left">${tr.cover ? `<img src="${escapeHtml(tr.cover)}" alt="">` : `<i class="fa-solid fa-music" style="color:var(--accent2)"></i>`}</div>
+            <div class="body"><b>${escapeHtml(tr.title||"Untitled")}</b><small>${escapeHtml(tr.artist||"Unknown")} • ${i===queuePos ? "playing" : "tap to play"}</small></div>
+            <div class="badge">${i===queuePos ? "now" : "go"}</div>
+          `;
+          d.addEventListener("click", ()=>{
+            queuePos = i; store.set("vb_queuePos", queuePos);
+            const idx = tracks.findIndex(x=>x.id===id);
+            closeDrawer();
+            if(idx !== -1) playIndex(idx, true);
+          });
+          wrapper.appendChild(d);
+        });
+      }
+
+      openDrawer(`<i class="fa-solid fa-music"></i> Queue`, wrapper);
+    }
+
+    function openNewPlaylistDrawer(){
+      const wrapper = document.createElement("div");
+      wrapper.className = "dgrid";
+
+      const form = document.createElement("div");
+      form.className = "dgrid";
+      form.innerHTML = `
+        <div class="pill"><i class="fa-solid fa-plus"></i> Create playlist</div>
+        <input class="input" id="plName" placeholder="Playlist name..." maxlength="40" />
+        <button class="btn primary" id="plCreate" type="button"><i class="fa-solid fa-check"></i> Create</button>
+      `;
+      wrapper.appendChild(form);
+
+      openDrawer(`<i class="fa-solid fa-list-ul"></i> New playlist`, wrapper);
+
+      setTimeout(()=>{
+        const name = $("#plName");
+        const create = $("#plCreate");
+        if(name) name.focus();
+        if(create){
+          create.addEventListener("click", ()=>{
+            const n = (name?.value || "").trim();
+            if(!n) return;
+            const id = `pl_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+            playlists.unshift({ id, name:n, items: [] });
+            persistAll();
+            rebuildPlaylistsList();
+            closeDrawer();
+          });
+        }
+      }, 0);
+    }
+
+    function openRenamePlaylistDrawer(pl){
+      const wrapper = document.createElement("div");
+      wrapper.className = "dgrid";
+      wrapper.innerHTML = `
+        <div class="pill"><i class="fa-solid fa-pen"></i> Rename</div>
+        <input class="input" id="plRename" value="${escapeHtml(pl.name)}" maxlength="40" />
+        <button class="btn primary" id="plSave" type="button"><i class="fa-solid fa-check"></i> Save</button>
+      `;
+      openDrawer(`<i class="fa-solid fa-pen"></i> Rename playlist`, wrapper);
+
+      setTimeout(()=>{
+        const inp = $("#plRename");
+        const btn = $("#plSave");
+        if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+        if(btn){
+          btn.addEventListener("click", ()=>{
+            const n = (inp?.value || "").trim();
+            if(!n) return;
+            pl.name = n;
+            playlists = playlists.map(x => x.id === pl.id ? pl : x);
+            persistAll();
+            rebuildPlaylistsList();
+            closeDrawer();
+          });
+        }
+      }, 0);
+    }
+
+    function openAddToPlaylistDrawer(trackToAdd = null, forcePlaylist = null){
+      const t = trackToAdd || currentTrack();
+      if(!t && !forcePlaylist) return;
+
+      // if no playlists, create first
+      if(!playlists.length){
+        openDrawer(`<i class="fa-solid fa-circle-info"></i> No playlists`, `
+          <div class="ditem" id="makePl">
+            <div class="left"><i class="fa-solid fa-plus" style="color:var(--accent2)"></i></div>
+            <div class="body"><b>Create a playlist first</b><small>Then add songs</small></div>
+            <div class="badge">go</div>
+          </div>
+        `);
+        setTimeout(()=>{
+          const m = $("#makePl");
+          if(m) m.addEventListener("click", ()=>{ closeDrawer(); openNewPlaylistDrawer(); });
+        },0);
+        return;
+      }
+
+      // If forcePlaylist is passed, show tracks to add into that playlist
+      if(forcePlaylist){
+        const pl = forcePlaylist;
+        const wrapper = document.createElement("div");
+        wrapper.className = "dgrid";
+
+        const head = document.createElement("div");
+        head.className = "split";
+        head.innerHTML = `
+          <span class="pill"><i class="fa-solid fa-list-ul"></i> ${escapeHtml(pl.name)}</span>
+          <span class="pill"><i class="fa-solid fa-music"></i> tap songs to add</span>
+        `;
+        wrapper.appendChild(head);
+
+        sortTracks(tracks).forEach(tr=>{
+          const d = document.createElement("div");
+          d.className = "ditem";
+          const has = pl.items.includes(tr.id);
+          d.innerHTML = `
+            <div class="left">${tr.cover ? `<img src="${escapeHtml(tr.cover)}" alt="">` : `<i class="fa-solid fa-music" style="color:var(--accent2)"></i>`}</div>
+            <div class="body"><b>${escapeHtml(tr.title||"Untitled")} ${has ? "✓" : ""}</b><small>${escapeHtml(tr.artist||"Unknown")}</small></div>
+            <div class="badge">${has ? "added" : "add"}</div>
+          `;
+          d.addEventListener("click", ()=>{
+            if(!pl.items.includes(tr.id)) pl.items.push(tr.id);
+            playlists = playlists.map(x => x.id === pl.id ? pl : x);
+            persistAll();
+            rebuildPlaylistsList();
+            openAddToPlaylistDrawer(null, pl);
+          });
+          wrapper.appendChild(d);
+        });
+
+        openDrawer(`<i class="fa-solid fa-square-plus"></i> Add songs`, wrapper);
+        return;
+      }
+
+      // Normal: choose playlist for a given track
+      const wrapper = document.createElement("div");
+      wrapper.className = "dgrid";
+
+      const head = document.createElement("div");
+      head.className = "ditem";
+      head.style.cursor = "default";
+      head.innerHTML = `
+        <div class="left">${t.cover ? `<img src="${escapeHtml(t.cover)}" alt="">` : `<i class="fa-solid fa-music" style="color:var(--accent2)"></i>`}</div>
+        <div class="body"><b>${escapeHtml(t.title||"Untitled")}</b><small>${escapeHtml(t.artist||"Unknown")}</small></div>
+        <div class="badge">track</div>
+      `;
+      wrapper.appendChild(head);
+
+      playlists.forEach(pl=>{
+        const has = pl.items.includes(t.id);
+        const d = document.createElement("div");
+        d.className = "ditem";
+        d.innerHTML = `
+          <div class="left"><i class="fa-solid fa-list-ul" style="color:var(--accent2)"></i></div>
+          <div class="body"><b>${escapeHtml(pl.name)} ${has ? "✓" : ""}</b><small>${pl.items.length} songs</small></div>
+          <div class="badge">${has ? "added" : "add"}</div>
+        `;
+        d.addEventListener("click", ()=>{
+          if(!pl.items.includes(t.id)) pl.items.push(t.id);
+          playlists = playlists.map(x => x.id === pl.id ? pl : x);
+          persistAll();
+          rebuildPlaylistsList();
+          closeDrawer();
+        });
+        wrapper.appendChild(d);
+      });
+
+      openDrawer(`<i class="fa-solid fa-square-plus"></i> Add to playlist`, wrapper);
+    }
+
+    function setQueueFromPlaylist(pl){
+      queue = pl.items.filter(id => tracks.some(t=>t.id===id));
+      if(!queue.length){
+        // fallback
+        queue = tracks.map(t=>t.id);
+      }
+      queuePos = 0;
+      shuffleOrder = [];
+      persistAll();
+
+      const id = queue[queuePos];
+      const idx = tracks.findIndex(t=>t.id===id);
+      showTab("tracks");
+      if(idx !== -1) playIndex(idx, true);
+    }
+
+    /* Tabs */
+    function showTab(name){
+      const setActive = (tab, yes) => {
+        tab.classList.toggle("active", yes);
+        tab.setAttribute("aria-selected", String(yes));
+      };
+
+      setActive(el.tabTracks, name === "tracks");
+      setActive(el.tabFav, name === "fav");
+      setActive(el.tabPlaylists, name === "playlists");
+
+      el.panelTracks.style.display = (name === "tracks") ? "block" : "none";
+      el.panelFav.style.display = (name === "fav") ? "block" : "none";
+      el.panelPlaylists.style.display = (name === "playlists") ? "block" : "none";
+    }
+
+    /* MediaSession (lockscreen/bluetooth controls) */
+    function updateMediaSession(){
+      const t = currentTrack();
+      if(!("mediaSession" in navigator)) return;
+
+      try{
+        navigator.mediaSession.metadata = t ? new MediaMetadata({
+          title: t.title || "Unknown",
+          artist: t.artist || "Unknown",
+          album: "ViralBit Music",
+          artwork: t.cover ? [
+            { src: t.cover, sizes: "512x512", type: "image/png" }
+          ] : []
+        }) : null;
+
+        navigator.mediaSession.setActionHandler("play", ()=> el.audio.play());
+        navigator.mediaSession.setActionHandler("pause", ()=> el.audio.pause());
+        navigator.mediaSession.setActionHandler("previoustrack", ()=> prev());
+        navigator.mediaSession.setActionHandler("nexttrack", ()=> next());
+        navigator.mediaSession.setActionHandler("seekto", (details)=>{
+          if(!isFinite(el.audio.duration) || typeof details.seekTime !== "number") return;
+          el.audio.currentTime = details.seekTime;
+        });
+      }catch{}
+    }
+
+    /* PWA install hooks (optional) */
+    function setupPwa(){
+      // Create a manifest from JS (works when served over http/https).
+      // For APK conversion, it's still useful (icon/splash can be added later).
+      const manifest = {
+        name: "ViralBit Music",
+        short_name: "ViralBit Music",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#070A14",
+        theme_color: "#0b1020",
+        icons: []
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = url;
+      document.head.appendChild(link);
+
+      // Minimal SW (cache shell only). Works when served (not file://).
+      if("serviceWorker" in navigator){
+        const swCode = `
+          const CACHE="vb-music-v1";
+          self.addEventListener("install", e=>{
+            e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["./"])));
+            self.skipWaiting();
+          });
+          self.addEventListener("activate", e=>e.waitUntil(self.clients.claim()));
+          self.addEventListener("fetch", e=>{
+            e.respondWith(
+              caches.match(e.request).then(r=>r || fetch(e.request).then(res=>{
+                const copy = res.clone();
+                if(e.request.method==="GET" && (e.request.destination==="document" || e.request.destination==="script" || e.request.destination==="style")){
+                  caches.open(CACHE).then(c=>c.put(e.request, copy)).catch(()=>{});
+                }
+                return res;
+              }).catch(()=>r))
+            );
+          });
+        `;
+        const swBlob = new Blob([swCode], { type: "text/javascript" });
+        const swUrl = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swUrl).catch(()=>{});
+      }
+    }
+
+    /* Build A–Z index */
+    function buildAzIndex(letterIds){
+      el.az.innerHTML = "";
+      const letters = Array.from({length:26},(_,i)=>String.fromCharCode(65+i));
+      letters.forEach(L=>{
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = L;
+        b.title = `Jump to ${L}`;
+        b.addEventListener("click", ()=>{
+          const id = letterIds.get(L);
+          if(id){
+            const node = document.getElementById(id);
+            if(node) node.scrollIntoView({behavior:"smooth", block:"start"});
+          }
+        });
+        el.az.appendChild(b);
+      });
+    }
+
+    /* Wire events */
+    el.btnSearch.addEventListener("click", ()=>{
+      const showing = el.searchWrap.style.display !== "none";
+      el.searchWrap.style.display = showing ? "none" : "flex";
+      if(!showing) setTimeout(()=> el.search.focus(), 0);
+    });
+
+    el.clearSearch.addEventListener("click", ()=>{
+      el.search.value = "";
+      rebuildTracks();
+      el.search.focus();
+    });
+    el.search.addEventListener("input", rebuildTracks);
+
+    el.btnSort.addEventListener("click", openSortDrawer);
+
+    el.btnImport.addEventListener("click", ()=> el.filePick.click());
+    el.filePick.addEventListener("change", ()=>{
+      importFiles(el.filePick.files);
+      el.filePick.value = "";
+    });
+
+    el.btnTheme.addEventListener("click", ()=>{
+      const cur = document.documentElement.getAttribute("data-theme") || "dark";
+      setTheme(cur === "dark" ? "light" : "dark");
+    });
+
+    // Tabs
+    el.tabTracks.addEventListener("click", ()=> showTab("tracks"));
+    el.tabFav.addEventListener("click", ()=> showTab("fav"));
+    el.tabPlaylists.addEventListener("click", ()=> showTab("playlists"));
+
+    // Mini open
+    el.miniOpen.addEventListener("click", (e)=>{
+      if(e.target.closest("button")) return;
+      openPlayer();
+    });
+    el.miniOpen.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openPlayer(); }
+    });
+
+    // Player close
+    el.pClose.addEventListener("click", closePlayer);
+    el.player.addEventListener("click", (e)=>{
+      if(e.target.classList.contains("backdrop")) closePlayer();
+    });
+
+    // Queue button
+    el.btnQueue.addEventListener("click", openQueueDrawer);
+
+    // Controls
+    el.play.addEventListener("click", togglePlay);
+    el.miniPlay.addEventListener("click", (e)=>{ e.stopPropagation(); togglePlay(); });
+
+    el.next.addEventListener("click", next);
+    el.prev.addEventListener("click", prev);
+
+    el.miniNext.addEventListener("click", (e)=>{ e.stopPropagation(); next(); });
+    el.miniPrev.addEventListener("click", (e)=>{ e.stopPropagation(); prev(); });
+
+    el.btnLike.addEventListener("click", toggleLike);
+    el.btnShuffle.addEventListener("click", toggleShuffle);
+    el.btnRepeat.addEventListener("click", cycleRepeat);
+
+    el.btnVol.addEventListener("click", toggleMute);
+
+    el.btnAddToPlaylist.addEventListener("click", ()=> openAddToPlaylistDrawer());
+
+    // playlists
+    el.btnNewPlaylist.addEventListener("click", openNewPlaylistDrawer);
+
+    // drawer close
+    el.dClose.addEventListener("click", closeDrawer);
+    el.drawerShade.addEventListener("click", closeDrawer);
+
+    // Seek
+    let seeking = false;
+    el.seek.addEventListener("input", ()=> seeking = true);
+    el.seek.addEventListener("change", ()=>{
+      if(!isFinite(el.audio.duration)) return;
+      const r = Number(el.seek.value) / 1000;
+      el.audio.currentTime = r * el.audio.duration;
+      seeking = false;
+      persistLast();
+    });
+
+    // Volume
+    el.vol.addEventListener("input", ()=>{
+      const v = Math.max(0, Math.min(1, Number(el.vol.value)));
+      el.audio.volume = v;
+      persistLast();
+    });
+
+    // Audio events
+    el.audio.addEventListener("timeupdate", ()=>{
+      if(!isFinite(el.audio.duration)) return;
+      el.cur.textContent = fmtTime(el.audio.currentTime);
+      el.dur.textContent = fmtTime(el.audio.duration);
+      if(!seeking){
+        el.seek.value = String(Math.floor((el.audio.currentTime / el.audio.duration) * 1000));
+      }
+      setPb((el.audio.currentTime / el.audio.duration) * 100);
+      persistLast();
+    });
+
+    el.audio.addEventListener("loadedmetadata", ()=>{
+      el.dur.textContent = fmtTime(el.audio.duration);
+    });
+
+    el.audio.addEventListener("play", ()=>{
+      updatePlayIcons();
+      updateMediaSession();
+    });
+    el.audio.addEventListener("pause", updatePlayIcons);
+
+    el.audio.addEventListener("ended", ()=>{
+      setPb(0);
+      if(repeatMode === "one"){
+        el.audio.currentTime = 0;
+        el.audio.play();
+        return;
+      }
+      next();
+    });
+
+    // keyboard (useful on desktop testing)
+    window.addEventListener("keydown", (e)=>{
+      if((e.key || "").toLowerCase() === " " && document.activeElement === document.body){
+        e.preventDefault(); togglePlay();
+      }
+      if((e.key || "").toLowerCase() === "arrowright"){ next(); }
+      if((e.key || "").toLowerCase() === "arrowleft"){ prev(); }
+      if((e.key || "").toLowerCase() === "l"){ toggleLike(); }
+    });
+
+    /* Init */
+    function init(){
+      // theme
+      const theme = store.get("vb_theme", document.documentElement.getAttribute("data-theme") || "dark");
+      setTheme(theme);
+
+      // prefs
+      el.audio.volume = Number(last.volume ?? 0.9);
+      el.vol.value = String(el.audio.volume);
+      el.audio.muted = !!last.muted;
+      el.volIco.className = el.audio.muted ? "fa-solid fa-volume-xmark" : "fa-solid fa-volume-high";
+
+      // Build queue
+      buildDefaultQueueIfNeeded();
+
+      // UI state
+      rebuildTracks();
+      rebuildFav();
+      rebuildPlaylistsList();
+
+      // restore last track if present
+      if(last.id){
+        const idx = tracks.findIndex(t => t.id === last.id);
+        if(idx !== -1){
+          currentIndex = idx;
+          const t = tracks[currentIndex];
+          applyMedia(t);
+
+          el.audio.src = t.src;
+          el.audio.load();
+
+          el.audio.addEventListener("loadedmetadata", ()=>{
+            if(isFinite(last.time) && last.time > 0 && last.time < el.audio.duration){
+              el.audio.currentTime = last.time;
+            }
+          }, { once:true });
+
+          updatePlayIcons();
+          setActiveRows();
+          updateMediaSession();
+        }
+      } else if(tracks.length){
+        // preload first
+        const id = queue[queuePos] ?? tracks[0].id;
+        const idx = tracks.findIndex(t => t.id === id);
+        if(idx !== -1){
+          currentIndex = idx;
+          applyMedia(tracks[currentIndex]);
+          el.audio.src = tracks[currentIndex].src;
+          el.audio.load();
+          updatePlayIcons();
+          setActiveRows();
+          updateMediaSession();
+        }
+      }
+
+      showTab("tracks");
+      setupPwa();
+    }
+
+    init();
+  </script>
+</body>
+</html>
